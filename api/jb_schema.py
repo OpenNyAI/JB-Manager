@@ -2,6 +2,9 @@ from typing import Optional, List, Dict
 from pydantic import BaseModel, Field
 
 
+class GithubAuth(BaseModel):
+    code: str
+
 class JBBotUpdate(BaseModel):
     name: Optional[str] = None
     phone_number: Optional[str] = None
@@ -43,6 +46,15 @@ class JBBotCode(BaseModel):
     index_urls: List[str]
     version: Optional[str] = "v0.1"
     required_credentials: Optional[List[str]] = Field(default_factory=list)
+
+    class Config:
+        from_attributes = True
+
+class JBAdminUser(BaseModel):
+    id:str
+    name:str
+    email: str
+    jb_secret: Optional[str] = None
 
     class Config:
         from_attributes = True

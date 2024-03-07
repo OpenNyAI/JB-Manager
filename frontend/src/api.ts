@@ -15,13 +15,18 @@ export const sendRequest = ({
     url='',
     method="GET",
     accessToken=null,
-    body={},
+    loginMethod=null,
+    body: any = {},
     headers = {},
+    onUnauthorized = null
   }) => {
       const header = new Headers({ ...headers })
       if (accessToken) {
           const bearer = `Bearer ${accessToken}`;
           header.append("Authorization", bearer);
+      }
+      if (loginMethod) {
+          header.append("loginMethod", loginMethod);
       }
       const options:any = {
           method: method,
@@ -38,20 +43,26 @@ export const sendRequest = ({
       }
     
   
-    return fetch(url, options).then(res => {
-      if (res.ok) {
-        return res.json();
-      } else {
-        return res.json().then(function(json) {
-          // to be able to access error status when you catch the error 
-          return Promise.reject({
-            status: res.status,
-            ok: false,
-            message: json.message,
-            body: json
-          });
-        });
-      }
+      return fetch(url, options).then(res => {
+        if (res.ok) {
+            return res.json();
+        } else if (res.status === 401) {
+            onUnauthorized && onUnauthorized();
+            return Promise.reject({
+                status: res.status,
+                ok: false,
+                message: "Unauthorized",
+            });
+        } else {
+            return res.json().then(json => {
+                return Promise.reject({
+                    status: res.status,
+                    ok: false,
+                    message: json.message,
+                    body: json,
+                });
+            });
+        }
     });
   };
-  
+   

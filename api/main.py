@@ -6,6 +6,7 @@ import os
 from typing import Dict
 import uuid
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from utils import extract_reference_id
 from confluent_kafka import KafkaException
@@ -105,7 +106,7 @@ async def update_bot_data(bot_id: str, update_fields: JBBotUpdate):
     bot = await get_bot_by_id(bot_id)
     if not bot:
         raise HTTPException(status_code=404, detail="Bot not found")
-    data = update_fields.dict(exclude_unset=True)
+    data = update_fields.model_dump(exclude_unset=True)
 
     # encrypt config_env
     if "config_env" in data:
